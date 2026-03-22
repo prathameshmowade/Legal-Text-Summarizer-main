@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LexAI – Legal Document Summarizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Mono:wght@300;400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #F7F4EF;
+    --bg2:       #EDE9E1;
+    --surface:   #FFFFFF;
+    --surface2:  #FAF8F5;
+    --border:    #DDD8CF;
+    --border2:   #C8C2B6;
+    --navy:      #1B2A4A;
+    --navy2:     #243560;
+    --gold:      #B07D2E;
+    --gold-lt:   #D4A044;
+    --gold-bg:   rgba(176,125,46,0.08);
+    --red:       #B84040;
+    --green:     #2E7D52;
+    --text:      #1B2A4A;
+    --text-2:    #4A5568;
+    --text-3:    #8A9BB0;
+    --shadow:    0 2px 12px rgba(27,42,74,0.08);
+    --shadow-lg: 0 8px 40px rgba(27,42,74,0.12);
+    --ease:      cubic-bezier(0.16,1,0.3,1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── DECORATIVE TOP BAR ─── */
+  .top-bar {
+    height: 3px;
+    background: linear-gradient(90deg, var(--navy) 0%, var(--gold) 50%, var(--navy2) 100%);
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    padding: 0 40px;
+    animation: slideDown 0.7s var(--ease) both;
+  }
+
+  .header-inner {
+    max-width: 1140px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-icon {
+    width: 38px; height: 38px;
+    background: var(--navy);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    box-shadow: 0 2px 8px rgba(27,42,74,0.25);
+  }
+
+  .logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+  }
+
+  .logo-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.01em;
+  }
+
+  .logo-tagline {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-top: 3px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+
+  .status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    animation: pulseDot 2.5s infinite;
+  }
+
+  @keyframes pulseDot { 0%,100%{opacity:1} 50%{opacity:0.25} }
+
+  /* ─── MAIN ─── */
+  main {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 48px 40px 80px;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    margin-bottom: 44px;
+    animation: fadeUp 0.8s var(--ease) 0.1s both;
+  }
+
+  .hero-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--gold-bg);
+    border: 1px solid rgba(176,125,46,0.25);
+    border-radius: 100px;
+    padding: 5px 14px 5px 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 18px;
+  }
+
+  .hero-pill-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--gold-lt);
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 4.5vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+    margin-bottom: 14px;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .hero p {
+    font-size: 1rem;
+    color: var(--text-2);
+    max-width: 560px;
+    line-height: 1.7;
+  }
+
+  /* ─── GRID ─── */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.9s var(--ease) 0.2s both;
+  }
+
+  @media (max-width: 780px) {
+    .grid { grid-template-columns: 1fr; }
+    main { padding: 32px 20px 60px; }
+    header { padding: 0 20px; }
+  }
+
+  /* ─── CARD ─── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+
+  .card:hover { box-shadow: var(--shadow-lg); }
+  .card:focus-within { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(176,125,46,0.1), var(--shadow-lg); }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+
+  .card-label-icon {
+    width: 22px; height: 22px;
+    background: var(--navy);
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.6rem;
+    color: #fff;
+  }
+
+  /* ─── TEXTAREA ─── */
+  textarea {
+    width: 100%;
+    min-height: 320px;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.77rem;
+    line-height: 1.85;
+    padding: 18px;
+    resize: vertical;
+    caret-color: var(--gold);
+  }
+
+  textarea::placeholder { color: var(--text-3); }
+
+  /* ─── UPLOAD STRIP ─── */
+  .upload-strip {
+    margin: 0 18px 4px;
+    border: 1.5px dashed var(--border2);
+    border-radius: 7px;
+    padding: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .upload-strip:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: var(--gold-bg);
+  }
+
+  .upload-strip input { display: none; }
+
+  /* ─── CARD FOOTER ─── */
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px;
+    background: var(--surface2);
+    border-top: 1px solid var(--border);
+  }
+
+  .char-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.1em;
+    color: var(--text-3);
+  }
+
+  .btn-sm {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-2);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-sm:hover { border-color: var(--red); color: var(--red); }
+
+  /* ─── OUTPUT BODY ─── */
+  .output-body {
+    padding: 18px;
+    min-height: 320px;
+    overflow-y: auto;
+  }
+
+  .placeholder-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 280px;
+    gap: 10px;
+    color: var(--text-3);
+    text-align: center;
+  }
+
+  .placeholder-glyph {
+    font-size: 2.4rem;
+    opacity: 0.2;
+    animation: float 3.5s ease-in-out infinite;
+    line-height: 1;
+  }
+
+  .placeholder-hint {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
+
+  /* ─── LOADING STATE ─── */
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 280px;
+    gap: 16px;
+  }
+
+  .loader-ring {
+    width: 44px; height: 44px;
+    border: 2px solid var(--border);
+    border-top-color: var(--navy);
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loader-dots {
+    display: flex; gap: 6px;
+  }
+
+  .loader-dots span {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--navy);
+    animation: bounce 1.2s ease infinite;
+  }
+
+  .loader-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .loader-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+  @keyframes bounce { 0%,80%,100%{transform:scale(0.6);opacity:0.4} 40%{transform:scale(1);opacity:1} }
+
+  .loader-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+
+  /* ─── SUMMARY OUTPUT ─── */
+  .summary-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.74rem;
+    line-height: 1.95;
+    color: var(--text);
+    white-space: pre-wrap;
+    animation: fadeUp 0.5s var(--ease) both;
+  }
+
+  .summary-text strong {
+    color: var(--navy);
+    font-weight: 500;
+    background: linear-gradient(90deg, rgba(176,125,46,0.12), transparent);
+    padding: 1px 6px 1px 4px;
+    border-left: 2px solid var(--gold);
+    margin-bottom: 2px;
+    display: inline-block;
+  }
+
+  .typing-cursor {
+    display: inline-block;
+    width: 2px; height: 13px;
+    background: var(--gold);
+    margin-left: 1px;
+    vertical-align: text-bottom;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* ─── ERROR BOX ─── */
+  .error-box {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 14px 16px;
+    background: rgba(184,64,64,0.06);
+    border: 1px solid rgba(184,64,64,0.2);
+    border-radius: 8px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .error-icon { font-size: 1rem; color: var(--red); flex-shrink: 0; line-height: 1.5; }
+
+  .error-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: #9B3333;
+    line-height: 1.7;
+  }
+
+  /* ─── COPY BUTTON ─── */
+  .copy-btn {
+    display: none;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-2);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .copy-btn:hover { border-color: var(--navy); color: var(--navy); }
+
+  /* ─── SUMMARIZE BUTTON ─── */
+  .btn-row {
+    display: flex;
+    justify-content: center;
+    margin: 8px 0 28px;
+    animation: fadeUp 0.9s var(--ease) 0.3s both;
+  }
+
+  .btn-summarize {
+    position: relative;
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 17px 60px;
+    border-radius: 10px;
+    cursor: pointer;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(27,42,74,0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    min-width: 260px;
+  }
+
+  .btn-summarize::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--navy2), #3A52A0);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .btn-summarize:hover::before { opacity: 1; }
+
+  .btn-summarize:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(27,42,74,0.35);
+  }
+
+  .btn-summarize:active { transform: translateY(0) scale(0.98); }
+
+  .btn-summarize:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .btn-summarize .btn-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .btn-summarize svg {
+    width: 16px; height: 16px;
+    transition: transform 0.25s ease;
+  }
+
+  .btn-summarize:hover svg { transform: translateX(4px); }
+
+  /* ─── RIPPLE ─── */
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    width: 80px; height: 80px;
+    background: rgba(255,255,255,0.25);
+    animation: ripple-out 0.6s linear;
+    pointer-events: none;
+    transform-origin: center;
+  }
+
+  @keyframes ripple-out { from{transform:scale(0);opacity:0.7} to{transform:scale(5);opacity:0} }
+
+  /* ─── STATS ─── */
+  .stats-row {
+    display: flex;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 40px;
+    animation: fadeUp 0.9s var(--ease) 0.4s both;
+  }
+
+  .stat-cell {
+    flex: 1;
+    padding: 18px 20px;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stat-cell:last-child { border-right: none; }
+
+  .stat-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+
+  /* ─── DIVIDER ─── */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 40px 0 20px;
+    animation: fadeUp 0.9s var(--ease) 0.45s both;
+  }
+
+  .divider-line { flex: 1; height: 1px; background: var(--border); }
+
+  .divider-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 28px 0 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    animation: fadeUp 1s var(--ease) 0.5s both;
+  }
+
+  .footer-devs {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .footer-devs-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 5px;
+  }
+
+  .footer-devs-names {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .dev-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 4px 12px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--navy);
+    box-shadow: 0 1px 4px rgba(27,42,74,0.06);
+  }
+
+  .footer-brand {
+    text-align: right;
+  }
+
+  .footer-brand-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-style: italic;
+    color: var(--navy);
+  }
+
+  .footer-brand-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-top: 3px;
+  }
+
+  /* ─── TOAST ─── */
+  .toast {
+    position: fixed;
+    bottom: 28px; left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--navy);
+    color: #fff;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    padding: 11px 22px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    z-index: 999;
+    transition: transform 0.4s var(--ease), opacity 0.4s ease;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  /* ─── KEYFRAMES ─── */
+  @keyframes slideDown { from{opacity:0;transform:translateY(-16px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeUp    { from{opacity:0;transform:translateY(18px)}  to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+
+<div class="top-bar"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">Lx</div>
+      <div class="logo-text">
+        <span class="logo-name">LexAI</span>
+        <span class="logo-tagline">Legal Intelligence</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="status-dot"></span>
+      Grok‑3 Active
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-pill">
+      <span class="hero-pill-dot"></span>
+      AI-Powered Legal Analysis
+    </div>
+    <h1>Understand any <em>legal document</em><br>in seconds.</h1>
+    <p>Paste your contract, NDA, lease, or legal text. LexAI extracts obligations, risks, key clauses, and delivers a plain-English summary — instantly.</p>
+  </section>
+
+  <!-- PANELS -->
+  <div class="grid">
+
+    <!-- INPUT CARD -->
+    <div class="card" id="inputCard">
+      <div class="card-header">
+        <div class="card-label">
+          <div class="card-label-icon">📄</div>
+          Document Input
+        </div>
+        <span style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text-3);letter-spacing:0.1em">PASTE OR UPLOAD</span>
+      </div>
+      <textarea id="docInput" placeholder="Paste your legal document here…&#10;&#10;Contracts · NDAs · Leases · Employment Agreements&#10;Terms of Service · Partnership Deeds · MoUs"></textarea>
+      <label class="upload-strip">
+        <input type="file" id="fileUpload" accept=".txt,.md"/>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Upload .txt file
+      </label>
+      <div class="card-footer">
+        <span class="char-count" id="charCount">0 characters</span>
+        <button class="btn-sm" onclick="clearInput()">✕ Clear</button>
+      </div>
+    </div>
+
+    <!-- OUTPUT CARD -->
+    <div class="card" id="outputCard">
+      <div class="card-header">
+        <div class="card-label">
+          <div class="card-label-icon">⚖</div>
+          Analysis Output
+        </div>
+        <button class="copy-btn" id="copyBtn" onclick="copyOutput()">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy
+        </button>
+      </div>
+      <div class="output-body" id="outputBody">
+        <div class="placeholder-state">
+          <div class="placeholder-glyph">⚖</div>
+          <div class="placeholder-hint">Awaiting document…</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SUMMARIZE BUTTON -->
+  <div class="btn-row">
+    <button class="btn-summarize" id="summarizeBtn" onclick="summarize(event)">
+      <span class="btn-inner">
+        Analyze Document
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </span>
+    </button>
+  </div>
+
+  <!-- STATS (hidden until result) -->
+  <div class="stats-row" id="statsRow" style="display:none">
+    <div class="stat-cell">
+      <span class="stat-val" id="sWords">—</span>
+      <span class="stat-label">Input Words</span>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-val" id="sSections">—</span>
+      <span class="stat-label">Sections</span>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-val" id="sTime">—</span>
+      <span class="stat-label">Time (s)</span>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-val" id="sRisk" style="font-size:1.2rem">—</span>
+      <span class="stat-label">Risk Level</span>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="section-divider">
+    <div class="divider-line"></div>
+    <span class="divider-label">Developed by</span>
+    <div class="divider-line"></div>
+  </div>
+
+  <footer>
+    <div class="footer-devs">
+      <div class="footer-devs-label">Team</div>
+      <div class="footer-devs-names">
+        <span class="dev-chip">Ayush D. Badwaik</span>
+        <span class="dev-chip">Prathamesh Mowade</span>
+        <span class="dev-chip">Sudhanshu Sathwane</span>
+        <span class="dev-chip">Sriyansh Sheel</span>
+      </div>
+    </div>
+    <div class="footer-brand">
+      <div class="footer-brand-name">LexAI</div>
+      <div class="footer-brand-sub">Legal clarity, instantly.</div>
+    </div>
+  </footer>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── CHAR COUNT ──
+  const docInput = document.getElementById('docInput');
+  docInput.addEventListener('input', () => {
+    const n = docInput.value.length;
+    document.getElementById('charCount').textContent = `${n.toLocaleString()} character${n !== 1 ? 's' : ''}`;
+  });
+
+  // ── FILE UPLOAD ──
+  document.getElementById('fileUpload').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const r = new FileReader();
+    r.onload = ev => {
+      docInput.value = ev.target.result;
+      docInput.dispatchEvent(new Event('input'));
+      showToast('File loaded ✓');
+    };
+    r.readAsText(file);
+  });
+
+  // ── CLEAR ──
+  function clearInput() {
+    docInput.value = '';
+    docInput.dispatchEvent(new Event('input'));
+    document.getElementById('outputBody').innerHTML = `
+      <div class="placeholder-state">
+        <div class="placeholder-glyph">⚖</div>
+        <div class="placeholder-hint">Awaiting document…</div>
+      </div>`;
+    document.getElementById('copyBtn').style.display = 'none';
+    document.getElementById('statsRow').style.display = 'none';
+  }
+
+  // ── SOUND ──
+  function playSound() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+      // Thud
+      const buf = ctx.createBuffer(1, ctx.sampleRate * 0.06, ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++)
+        d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 4);
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      const g = ctx.createGain();
+      g.gain.value = 0.35;
+      src.connect(g); g.connect(ctx.destination); src.start();
+
+      // Tone sweep
+      const osc = ctx.createOscillator();
+      const eg = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(220, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.2);
+      eg.gain.setValueAtTime(0, ctx.currentTime);
+      eg.gain.linearRampToValueAtTime(0.18, ctx.currentTime + 0.03);
+      eg.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      osc.connect(eg); eg.connect(ctx.destination);
+      osc.start(); osc.stop(ctx.currentTime + 0.32);
+
+      // Sparkle
+      const osc2 = ctx.createOscillator();
+      const eg2 = ctx.createGain();
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(1400, ctx.currentTime + 0.06);
+      osc2.frequency.exponentialRampToValueAtTime(2800, ctx.currentTime + 0.22);
+      eg2.gain.setValueAtTime(0, ctx.currentTime + 0.06);
+      eg2.gain.linearRampToValueAtTime(0.07, ctx.currentTime + 0.1);
+      eg2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.28);
+      osc2.connect(eg2); eg2.connect(ctx.destination);
+      osc2.start(ctx.currentTime + 0.06); osc2.stop(ctx.currentTime + 0.32);
+    } catch(e) {}
+  }
+
+  // ── RIPPLE ──
+  function ripple(btn, e) {
+    const rect = btn.getBoundingClientRect();
+    const el = document.createElement('div');
+    el.className = 'ripple';
+    el.style.left = (e.clientX - rect.left - 40) + 'px';
+    el.style.top  = (e.clientY - rect.top  - 40) + 'px';
+    btn.appendChild(el);
+    setTimeout(() => el.remove(), 700);
+  }
+
+  // ── SUMMARIZE ──
+  async function summarize(e) {
+    const text = docInput.value.trim();
+    if (!text) { showToast('Please paste a document first.'); return; }
+
+    const btn = document.getElementById('summarizeBtn');
+    playSound();
+    ripple(btn, e);
+
+    btn.disabled = true;
+    btn.querySelector('.btn-inner').innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+           style="animation:spin 0.75s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+      Analyzing…`;
+
+    document.getElementById('outputBody').innerHTML = `
+      <div class="loading-state">
+        <div class="loader-ring"></div>
+        <div class="loader-dots"><span></span><span></span><span></span></div>
+        <div class="loader-text">Processing legal document…</div>
+      </div>`;
+    document.getElementById('copyBtn').style.display = 'none';
+
+    const t0 = Date.now();
+
+    try {
+      const res = await fetch('/summarize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        throw new Error(data.error || `Server error ${res.status}`);
+      }
+
+      const summary = data.summary;
+      const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+
+      renderSummary(summary);
+
+      // Stats
+      const words    = text.split(/\s+/).filter(Boolean).length;
+      const sections = (summary.match(/\*\*\d\./g) || []).length;
+      const risk     = summary.toLowerCase().includes('high risk') ? 'HIGH'
+                     : summary.toLowerCase().includes('moderate')  ? 'MED' : 'LOW';
+
+      document.getElementById('sWords').textContent    = words.toLocaleString();
+      document.getElementById('sSections').textContent = sections || '7';
+      document.getElementById('sTime').textContent     = elapsed;
+      const riskEl = document.getElementById('sRisk');
+      riskEl.textContent  = risk;
+      riskEl.style.color  = risk === 'HIGH' ? 'var(--red)' : risk === 'MED' ? '#B07D2E' : 'var(--green)';
+      document.getElementById('statsRow').style.display = 'flex';
+
+      document.getElementById('copyBtn').style.display = 'flex';
+      showToast('Analysis complete ✓');
+
+    } catch(err) {
+      document.getElementById('outputBody').innerHTML = `
+        <div class="error-box">
+          <span class="error-icon">⚠</span>
+          <div class="error-text">
+            <strong>Error:</strong> ${err.message}<br>
+            <small style="opacity:0.65">Check the server and try again.</small>
+          </div>
+        </div>`;
+      showToast('Analysis failed.');
+    }
+
+    btn.disabled = false;
+    btn.querySelector('.btn-inner').innerHTML = `
+      Analyze Document
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="12 5 19 12 12 19"/>
+      </svg>`;
+  }
+
+  // ── TYPEWRITER ──
+  function renderSummary(text) {
+    const body = document.getElementById('outputBody');
+    body.innerHTML = '<div class="summary-text" id="summaryEl"></div>';
+    const el = document.getElementById('summaryEl');
+
+    function md(t) {
+      return t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    let i = 0;
+    function type() {
+      if (i < text.length) {
+        el.innerHTML = md(text.slice(0, i + 5)) + '<span class="typing-cursor"></span>';
+        i += 5;
+        setTimeout(type, 9);
+      } else {
+        el.innerHTML = md(text);
+      }
+    }
+    type();
+  }
+
+  // ── COPY ──
+  function copyOutput() {
+    const el = document.getElementById('summaryEl');
+    if (!el) return;
+    navigator.clipboard.writeText(el.innerText || el.textContent)
+      .then(() => showToast('Copied to clipboard ✓'))
+      .catch(() => showToast('Copy failed.'));
+  }
+
+  // ── TOAST ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+</script>
+
+</body>
+</html>

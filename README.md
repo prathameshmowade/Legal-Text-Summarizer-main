@@ -1,6 +1,6 @@
 # LexAI – Legal Document Summarizer
 
-Developed by **Ayush D. Badwaik**, **Prathamesh Mowade**, **Sudhanshu Sathwane**, **Sriyansh Sheel**
+Developed by **Prathamesh Mowade**,**Ayush D. Badwaik**, **Sudhanshu Sathwane**, **Sriyansh Sheel**
 
 ---
 
